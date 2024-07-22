@@ -1,10 +1,6 @@
 package main
 
 import (
-
-	// "encoding/json"
-	// "fmt"
-	// "log"
 	"context"
 	"mailer/go-lambda/services"
 
