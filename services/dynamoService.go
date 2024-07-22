@@ -1,7 +1,6 @@
 package services
 
 import (
-	"fmt"
 	"log"
 	"mailer/go-lambda/config"
 	domain "mailer/go-lambda/domain/emails"
@@ -11,7 +10,6 @@ import (
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/service/dynamodb"
 	"github.com/aws/aws-sdk-go/service/dynamodb/dynamodbattribute"
-	"github.com/joho/godotenv"
 )
 
 var (
@@ -19,11 +17,6 @@ var (
 )
 
 func SaveEmail(emailTo, emailType string) error {
-
-	err := godotenv.Load()
-	if err != nil {
-		fmt.Println(err)
-	}
 
 	svc := dynamodb.New(sess)
 
@@ -40,7 +33,7 @@ func SaveEmail(emailTo, emailType string) error {
 
 		input := &dynamodb.PutItemInput{
 			Item:      av,
-			TableName: aws.String(os.Getenv("table")),
+			TableName: aws.String(os.Getenv("TABLE")),
 		}
 
 		Send(emailTo, "Thank you for Registering", "assets/ty-registering.html")
@@ -62,7 +55,7 @@ func SaveEmail(emailTo, emailType string) error {
 
 		input := &dynamodb.PutItemInput{
 			Item:      av,
-			TableName: aws.String(os.Getenv("table")),
+			TableName: aws.String(os.Getenv("TABLE")),
 		}
 
 		Send(emailTo, "Thank you for Buying with us", "assets/ty-order.html")

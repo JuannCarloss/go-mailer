@@ -3,6 +3,7 @@ package config
 import (
 	"fmt"
 	"log"
+	"os"
 
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/awserr"
@@ -10,14 +11,13 @@ import (
 )
 
 var (
-	sess      = NewSession()
-	svc       = dynamodb.New(sess)
-	tableName = "emails"
+	sess = NewSession()
+	svc  = dynamodb.New(sess)
 )
 
 func CreateTableEmails() {
 	input := &dynamodb.DescribeTableInput{
-		TableName: aws.String(tableName),
+		TableName: aws.String(os.Getenv("TABLE")),
 	}
 
 	_, err := svc.DescribeTable(input)
@@ -28,7 +28,7 @@ func CreateTableEmails() {
 			log.Fatalf("Error describing table: %v", err)
 		}
 	} else {
-		fmt.Println("Table", tableName, "already exists")
+		fmt.Println("Table", os.Getenv("TABLE"), "already exists")
 	}
 }
 
@@ -58,7 +58,7 @@ func createTable() {
 			ReadCapacityUnits:  aws.Int64(10),
 			WriteCapacityUnits: aws.Int64(10),
 		},
-		TableName: aws.String(tableName),
+		TableName: aws.String(os.Getenv("TABLE")),
 	}
 
 	_, err := svc.CreateTable(input)
@@ -66,5 +66,5 @@ func createTable() {
 		log.Fatalf("Got error calling CreateTable: %s", err)
 	}
 
-	fmt.Println("Created the table", tableName)
+	fmt.Println("Created the table", os.Getenv("TABLE"))
 }
