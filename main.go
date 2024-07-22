@@ -1,36 +1,46 @@
 package main
 
 import (
-	//"mailer/go-lambda/config"
-	"log"
+
+	// "encoding/json"
+	// "fmt"
+	// "log"
+	"context"
 	"mailer/go-lambda/services"
 
 	"github.com/aws/aws-lambda-go/events"
 	"github.com/aws/aws-lambda-go/lambda"
 )
 
-func handler(request events.APIGatewayV2HTTPRequest) events.APIGatewayV2HTTPResponse {
-	email := request.QueryStringParameters["email"]
-	emailType := request.QueryStringParameters["emailType"]
+type RequestBody struct {
+	Email     string `json:"email"`
+	EmailType string `json:"emailType"`
+}
 
-	err := services.SaveEmail(email, emailType)
+func handler(context context.Context, email RequestBody) (events.APIGatewayProxyResponse, error) {
+
+	if email.Email == "" || email.EmailType == "" {
+		return events.APIGatewayProxyResponse{
+			StatusCode: 422,
+			Body:       "email or emailType is blank or null",
+		}, nil
+	}
+
+	err := services.SaveEmail(email.Email, email.EmailType)
+
 	if err != nil {
-		log.Printf("Error while saving the email: %v", err)
-		return events.APIGatewayV2HTTPResponse{
-			StatusCode: 500,
-			Body:       "Error while saving the email",
-		}
+		return events.APIGatewayProxyResponse{
+			StatusCode: 422,
+			Body:       "got error while saving the email",
+		}, nil
 	}
-	return events.APIGatewayV2HTTPResponse{
-		StatusCode: 200,
+
+	return events.APIGatewayProxyResponse{
+		StatusCode: 201,
 		Body:       "email sent",
-	}
+	}, nil
 }
 
 func main() {
-	//config.CreateTableEmails()
-	//services.Send()
-	//services.SaveEmail("", "REGISTER")
-
 	lambda.Start(handler)
 }
