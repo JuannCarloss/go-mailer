@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"encoding/json"
 	"mailer/go-lambda/services"
 
 	"github.com/aws/aws-lambda-go/events"
@@ -13,17 +14,25 @@ type RequestBody struct {
 	EmailType string `json:"emailType"`
 }
 
-func handler(context context.Context, email RequestBody) (events.APIGatewayProxyResponse, error) {
+func handler(context context.Context, event events.APIGatewayProxyRequest) (events.APIGatewayProxyResponse, error) {
 
-	if email.Email == "" || email.EmailType == "" {
+	var emailBody RequestBody
+	err := json.Unmarshal([]byte(event.Body), &emailBody)
+	if err != nil {
+		return events.APIGatewayProxyResponse{
+			StatusCode: 422,
+			Body:       "Invalid JSON payload",
+		}, nil
+	}
+
+	if emailBody.Email == "" || emailBody.EmailType == "" {
 		return events.APIGatewayProxyResponse{
 			StatusCode: 422,
 			Body:       "email or emailType is blank or null",
 		}, nil
 	}
 
-	err := services.SaveEmail(email.Email, email.EmailType)
-
+	err = services.SaveEmail(emailBody.Email, emailBody.EmailType)
 	if err != nil {
 		return events.APIGatewayProxyResponse{
 			StatusCode: 422,
